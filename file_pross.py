@@ -24,20 +24,6 @@ import matplotlib.image as mpimg
 
 def get_data(fname,mode):
 	print('Processing:',fname,'\n');
-	import cv2;
-	import numpy as np
-	import matplotlib.pyplot as plt
-	def wind(I,r,c):
-		if((c+16 > I.shape[1]) | (c-16 < 0) | (r+16 > I.shape[0]) | (r-16 < 0) ):
-			print("error out of bounds, skipping");
-			return I[1:32,1:32],0;
-		else:
-			ll = I[r-16:r+16,c-16:c+16];
-			if((ll.shape[0] == 32)&(ll.shape[1] == 32)):
-				return ll,1;
-			else:
-				print("misshapen, skipping");
-				return ll,0;
 	def wind_new(TI,I,r,c,R,C,mode):
 		if((c+16 > I.shape[1]) | (c-16 < 0) | (r+16 > I.shape[0]) | (r-16 < 0) ):
 			print("error out of bounds, skipping");
@@ -55,7 +41,7 @@ def get_data(fname,mode):
 			return I[1:32,1:32],0;
 		newr = R[final_i-16:final_i+16];
 		newc = C[final_i-16:final_i+16];
-		mask = np.zeros((TI.shape[0],TI.shape[1]),'uint8');
+		mask = np.zeros((TI.shape[0],TI.shape[1]),'uint8');		
 		mask[newr,newc] = 255;
 		if mode == 'stroke':
 			return mask[r-16:r+16,c-16:c+16].copy(),1;
@@ -71,9 +57,13 @@ def get_data(fname,mode):
 	I = cv2.imread(fname);
 	IG = cv2.cvtColor(I,cv2.COLOR_BGR2GRAY);
 	th2,TG = cv2.threshold(IG,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-	L = cv2.findNonZero(TG)
-	c = L[:,0,0];
-	r = L[:,0,1];
+	r = [];
+	c = [];
+	for i in range(0,TG.shape[1]):
+		if(sum(TG[:,i] != 0) != 0):
+			tem = list(np.where(TG[:,i] != 0)[0]);
+			r+= tem;
+			c += [i]*len(tem);
 	rr = [];
 	cc = [];
 	for i,C in enumerate(c):
@@ -84,8 +74,7 @@ def get_data(fname,mode):
 		fin_arr = [];
 		for i,m in enumerate(rr):
 			iii,mm = wind_new(TG,I,m,cc[i],r,c,mode);
-			print(iii.shape)
-			cv2.waitKey();
+			#iii = np.zeros((32,32)); mm = 1;
 			if(mm == 0):
 				continue;
 			if i == 0:
@@ -95,7 +84,8 @@ def get_data(fname,mode):
 				fin_arr = np.expand_dims(iii,2);
 				continue;
 			fin_arr = np.concatenate((fin_arr,np.expand_dims(iii,2)),2);
-		fin_arr = np.reshape(fin_arr,(fin_arr.shape[2],32,32,1));
+		fin_arr = np.rollaxis(fin_arr,2,0);
+		fin_arr = np.expand_dims(fin_arr,3);
 		return fin_arr/255;
 	if mode == 'bgr':
 		fin_arr = [];
@@ -110,8 +100,9 @@ def get_data(fname,mode):
 				fin_arr = np.expand_dims(iii,3);
 				continue;
 			fin_arr = np.concatenate((fin_arr,np.expand_dims(iii,3)),3);
-		fin_arr = np.reshape(fin_arr,(fin_arr.shape[3],32,32,3));
+		fin_arr = np.rollaxis(fin_arr,3,0);
 		return fin_arr/255;
+
 
 dat = get_data('/home/vonnegut/Keras/plots/0007.jpg','stroke');
 
