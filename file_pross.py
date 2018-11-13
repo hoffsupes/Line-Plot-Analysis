@@ -153,3 +153,4 @@ plt.imshow(data[1,:,:].reshape(32,32))
 display_activation(activations,4,8,1);
 plt.show();
 """
+
