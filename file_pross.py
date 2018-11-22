@@ -71,6 +71,7 @@ def get_data(fname,mode,N,reshap):
 		if mode == 'stroke':
 			mask = np.zeros(TI.shape,'uint8');
 			mask[newr,newc] = 255;
+			#cv2.imwrite('/home/vonnegut/Keras/res/'+ str(globi[0]) + '_segment.jpeg',mask[r-M:r+M,c-M:c+M]);
 			#globi[0] = globi[0] + 1;
 			#if(mask[r-M:r+M,c-M:c+M].shape[0] == 99):
 				#pdb.set_trace();
@@ -172,15 +173,15 @@ def draw_labels(labs,P,NR,NC):
 	for i,m in enumerate(labs):
 		cv2.putText (I,str(ord(m)),(NC[i],NR[i]),1, 0.8, (0,0,255),1,2);
 	cv2.imwrite(fnam + '_labels.jpeg',I);
-
-
-data,nr,nc = get_data('/home/vonnegut/Keras/plots/0019.jpg','bgr',100,32);
+	
+			
+data,nr,nc = get_data('plots/0019.jpg','bgr',100,32);
 #labs = list(map(chr,range(0,len(nr))));
 symbols = ['а','б','в','г','д','е','ё','ж','з','и','й','к','л','м','н','о','п','р','с','т','у','ф','х','ц','ч','ш','щ','ъ','ы','ь','э','ю','я']
 labs = ['б','в','г','д','е','ё','ж']
 nr = [40,100,38,28,93,49,28];
 nc = [100,34,83,92,87,24,59];
-draw_labels(labs,'~/Keras/plots/0019.jpg',nr,nc)
+draw_labels(labs,'plots/0019.jpg',nr,nc)
 
 """
 json_file = open('model.json', 'r')
